@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Jaringan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            background: rgba(79, 172, 254, 0.1);
+            color: #4facfe;
+        }
+
+        .nav-tab.active {
+            color: #4facfe;
+            background: white;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #4facfe;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .card h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3::before {
+            content: '🔄';
+            font-size: 1.2em;
+        }
+
+        .subnetting h3::before {
+            content: '🔢';
+        }
+
+        .ip-analysis h3::before {
+            content: '🔍';
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kalkulator Jaringan</h1>
+            <p>Konverter Bilangan, Subnetting, dan Analisis IP Class</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('converter')">Konverter Bilangan</button>
+            <button class="nav-tab" onclick="switchTab('subnetting')">Kalkulator Subnetting</button>
+            <button class="nav-tab" onclick="switchTab('ip-analysis')">Analisis IP Class</button>
+        </div>
+
+        <!-- Tab 1: Konverter Bilangan -->
+        <div id="converter" class="tab-content active">
+            <div class="converter-grid">
+                <div class="card">
+                    <h3>Decimal ke Binary</h3>
+                    <div class="form-group">
+                        <label for="decimalInput">Masukkan Bilangan Decimal:</label>
+                        <input type="number" id="decimalInput" placeholder="Contoh: 192" min="0" max="255">
+                    </div>
+                    <button class="btn" onclick="convertDecToBin()">Konversi</button>
+                    <div id="decToBinResult" class="result">
+                        <h4>Hasil Konversi:</h4>
+                        <div class="result-item">
+                            <span>Decimal:</span>
+                            <span id="decValue"></span>
+                        </div>
+                        <div class="result-item">
+                            <span>Binary:</span>
+                            <span id="binValue"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Binary ke Decimal</h3>
+                    <div class="form-group">
+                        <label for="binaryInput">Masukkan Bilangan Binary:</label>
+                        <input type="text" id="binaryInput" placeholder="Contoh: 11000000" pattern="[01]*">
+                    </div>
+                    <button class="btn" onclick="convertBinToDec()">Konversi</button>
+                    <div id="binToDecResult" class="result">
+                        <h4>Hasil Konversi:</h4>
+                        <div class="result-item">
+                            <span>Binary:</span>
+                            <span id="binValueResult"></span>
+                        </div>
+                        <div class="result-item">
+                            <span>Decimal:</span>
+                            <span id="decValueResult"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Kalkulator Subnetting -->
+        <div id="subnetting" class="tab-content">
+            <div class="card subnetting">
+                <h3>Kalkulator Subnetting</h3>
+                <div class="form-group">
+                    <label for="networkAddress">Network Address:</label>
+                    <input type="text" id="networkAddress" placeholder="Contoh: 192.168.1.0">
+                </div>
+                <div class="form-group">
+                    <label for="subnetMask">Subnet Mask (CIDR):</label>
+                    <select id="subnetMask">
+                        <option value="8">/8 (255.0.0.0)</option>
+                        <option value="16">/16 (255.255.0.0)</option>
+                        <option value="24" selected>/24 (255.255.255.0)</option>
+                        <option value="25">/25 (255.255.255.128)</option>
+                        <option value="26">/26 (255.255.255.192)</option>
+                        <option value="27">/27 (255.255.255.224)</option>
+                        <option value="28">/28 (255.255.255.240)</option>
+                        <option value="29">/29 (255.255.255.248)</option>
+                        <option value="30">/30 (255.255.255.252)</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="calculateSubnetting()">Hitung Subnetting</button>
+                <div id="subnettingResult" class="result">
+                    <h4>Hasil Perhitungan Subnetting:</h4>
+                    <div id="subnettingDetails"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Analisis IP Class -->
+        <div id="ip-analysis" class="tab-content">
+            <div class="card ip-analysis">
+                <h3>Analisis IP Class</h3>
+                <div class="form-group">
+                    <label for="ipAddress">IP Address:</label>
+                    <input type="text" id="ipAddress" placeholder="Contoh: 192.168.1.1">
+                </div>
+                <button class="btn" onclick="analyzeIP()">Analisis IP</button>
+                <div id="ipAnalysisResult" class="result">
+                    <h4>Hasil Analisis IP:</h4>
+                    <div id="ipAnalysisDetails"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function untuk switch tab
+        function switchTab(tabName) {
+            // Hide semua tab content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class dari semua nav tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show tab yang dipilih
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Konversi Decimal ke Binary
+        function convertDecToBin() {
+            const decimal = parseInt(document.getElementById('decimalInput').value);
+            
+            if (isNaN(decimal) || decimal < 0 || decimal > 255) {
+                alert('Masukkan bilangan decimal yang valid (0-255)');
+                return;
+            }
+            
+            const binary = decimal.toString(2).padStart(8, '0');
+            
+            document.getElementById('decValue').textContent = decimal;
+            document.getElementById('binValue').textContent = binary;
+            document.getElementById('decToBinResult').style.display = 'block';
+        }
+
+        // Konversi Binary ke Decimal
+        function convertBinToDec() {
+            const binary = document.getElementById('binaryInput').value;
+            
+            if (!/^[01]+$/.test(binary)) {
+                alert('Masukkan bilangan binary yang valid (hanya 0 dan 1)');
+                return;
+            }
+            
+            const decimal = parseInt(binary, 2);
+            
+            document.getElementById('binValueResult').textContent = binary;
+            document.getElementById('decValueResult').textContent = decimal;
+            document.getElementById('binToDecResult').style.display = 'block';
+        }
+
+        // Kalkulator Subnetting
+        function calculateSubnetting() {
+            const networkAddr = document.getElementById('networkAddress').value;
+            const cidr = parseInt(document.getElementById('subnetMask').value);
+            
+            if (!isValidIP(networkAddr)) {
+                alert('Masukkan network address yang valid');
+                return;
+            }
+            
+            const results = calculateSubnetDetails(networkAddr, cidr);
+            displaySubnettingResults(results);
+        }
+
+        function calculateSubnetDetails(networkAddr, cidr) {
+            const hostBits = 32 - cidr;
+            const totalHosts = Math.pow(2, hostBits);
+            const usableHosts = totalHosts - 2;
+            
+            const subnetMask = cidrToSubnetMask(cidr);
+            const networkParts = networkAddr.split('.').map(x => parseInt(x));
+            const maskParts = subnetMask.split('.').map(x => parseInt(x));
+            
+            // Calculate network address
+            const networkAddress = networkParts.map((part, i) => part & maskParts[i]).join('.');
+            
+            // Calculate broadcast address
+            const broadcastParts = networkParts.map((part, i) => part | (255 - maskParts[i]));
+            const broadcastAddress = broadcastParts.join('.');
+            
+            // Calculate first and last usable host
+            const firstHostParts = [...networkParts.map((part, i) => part & maskParts[i])];
+            firstHostParts[3] += 1;
+            const firstHost = firstHostParts.join('.');
+            
+            const lastHostParts = [...broadcastParts];
+            lastHostParts[3] -= 1;
+            const lastHost = lastHostParts.join('.');
+            
+            return {
+                networkAddress,
+                subnetMask,
+                broadcastAddress,
+                firstHost,
+                lastHost,
+                totalHosts,
+                usableHosts,
+                cidr
+            };
+        }
+
+        function cidrToSubnetMask(cidr) {
+            const mask = (0xFFFFFFFF << (32 - cidr)) >>> 0;
+            return [
+                (mask >>> 24) & 0xFF,
+                (mask >>> 16) & 0xFF,
+                (mask >>> 8) & 0xFF,
+                mask & 0xFF
+            ].join('.');
+        }
+
+        function displaySubnettingResults(results) {
+            const detailsDiv = document.getElementById('subnettingDetails');
+            detailsDiv.innerHTML = `
+                <div class="result-item">
+                    <span>Network Address:</span>
+                    <span>${results.networkAddress}/${results.cidr}</span>
+                </div>
+                <div class="result-item">
+                    <span>Subnet Mask:</span>
+                    <span>${results.subnetMask}</span>
+                </div>
+                <div class="result-item">
+                    <span>Broadcast Address:</span>
+                    <span>${results.broadcastAddress}</span>
+                </div>
+                <div class="result-item">
+                    <span>First Host:</span>
+                    <span>${results.firstHost}</span>
+                </div>
+                <div class="result-item">
+                    <span>Last Host:</span>
+                    <span>${results.lastHost}</span>
+                </div>
+                <div class="result-item">
+                    <span>Total Hosts:</span>
+                    <span>${results.totalHosts}</span>
+                </div>
+                <div class="result-item">
+                    <span>Usable Hosts:</span>
+                    <span>${results.usableHosts}</span>
+                </div>
+            `;
+            document.getElementById('subnettingResult').style.display = 'block';
+        }
+
+        // Analisis IP Class
+        function analyzeIP() {
+            const ip = document.getElementById('ipAddress').value;
+            
+            if (!isValidIP(ip)) {
+                alert('Masukkan IP address yang valid');
+                return;
+            }
+            
+            const analysis = getIPClassAnalysis(ip);
+            displayIPAnalysis(analysis);
+        }
+
+        function getIPClassAnalysis(ip) {
+            const parts = ip.split('.').map(x => parseInt(x));
+            const firstOctet = parts[0];
+            
+            let ipClass, range, defaultMask, type;
+            
+            if (firstOctet >= 1 && firstOctet <= 126) {
+                ipClass = 'A';
+                range = '1.0.0.0 - 126.255.255.255';
+                defaultMask = '255.0.0.0 (/8)';
+            } else if (firstOctet >= 128 && firstOctet <= 191) {
+                ipClass = 'B';
+                range = '128.0.0.0 - 191.255.255.255';
+                defaultMask = '255.255.0.0 (/16)';
+            } else if (firstOctet >= 192 && firstOctet <= 223) {
+                ipClass = 'C';
+                range = '192.0.0.0 - 223.255.255.255';
+                defaultMask = '255.255.255.0 (/24)';
+            } else if (firstOctet >= 224 && firstOctet <= 239) {
+                ipClass = 'D (Multicast)';
+                range = '224.0.0.0 - 239.255.255.255';
+                defaultMask = 'N/A';
+            } else if (firstOctet >= 240 && firstOctet <= 255) {
+                ipClass = 'E (Reserved)';
+                range = '240.0.0.0 - 255.255.255.255';
+                defaultMask = 'N/A';
+            }
+            
+            // Determine if private or public
+            if ((firstOctet === 10) ||
+                (firstOctet === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+                (firstOctet === 192 && parts[1] === 168)) {
+                type = 'Private';
+            } else if (firstOctet === 127) {
+                type = 'Loopback';
+            } else {
+                type = 'Public';
+            }
+            
+            // Convert to binary
+            const binaryIP = parts.map(part => part.toString(2).padStart(8, '0')).join('.');
+            
+            return {
+                ip,
+                ipClass,
+                range,
+                defaultMask,
+                type,
+                binaryIP
+            };
+        }
+
+        function displayIPAnalysis(analysis) {
+            const detailsDiv = document.getElementById('ipAnalysisDetails');
+            detailsDiv.innerHTML = `
+                <div class="result-item">
+                    <span>IP Address:</span>
+                    <span>${analysis.ip}</span>
+                </div>
+                <div class="result-item">
+                    <span>IP Class:</span>
+                    <span>${analysis.ipClass}</span>
+                </div>
+                <div class="result-item">
+                    <span>Class Range:</span>
+                    <span>${analysis.range}</span>
+                </div>
+                <div class="result-item">
+                    <span>Default Subnet Mask:</span>
+                    <span>${analysis.defaultMask}</span>
+                </div>
+                <div class="result-item">
+                    <span>Type:</span>
+                    <span>${analysis.type}</span>
+                </div>
+                <div class="result-item">
+                    <span>Binary Representation:</span>
+                    <span>${analysis.binaryIP}</span>
+                </div>
+            `;
+            document.getElementById('ipAnalysisResult').style.display = 'block';
+        }
+
+        // Helper function untuk validasi IP
+        function isValidIP(ip) {
+            const parts = ip.split('.');
+            if (parts.length !== 4) return false;
+            
+            return parts.every(part => {
+                const num = parseInt(part);
+                return !isNaN(num) && num >= 0 && num <= 255;
+            });
+        }
+    </script>
+</body>
+</html>
